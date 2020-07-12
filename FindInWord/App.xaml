@@ -1,0 +1,16 @@
+﻿<Application x:Class="FindInWord.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FindInWord"
+             StartupUri="View/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="View/Button_style.xaml"/>
+                <ResourceDictionary Source="View/Text_style.xaml"/>
+                <ResourceDictionary Source="View/List_style.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+
+    </Application.Resources>
+</Application>

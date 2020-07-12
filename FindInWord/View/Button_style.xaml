@@ -1,0 +1,54 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:FindInWord.View">
+    <Style  TargetType="Button">
+        <Setter Property="Control.Background">
+            <Setter.Value>
+                <LinearGradientBrush>
+                    <LinearGradientBrush.GradientStops>
+                        <GradientStop Color="LightBlue" Offset="0" />
+                        <GradientStop Color="LightGreen" Offset="1" />
+                    </LinearGradientBrush.GradientStops>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="FontFamily" Value="Global User Interface" />
+        <Setter Property="Foreground" Value="Black" />
+        <Setter Property="Margin" Value="10" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border CornerRadius="10" Background="{TemplateBinding Background}" Name="border">                                                   
+                        <ContentPresenter x:Name="MyContentPresenter" Content="{TemplateBinding Content}" HorizontalAlignment="Center" VerticalAlignment="Center" />                        
+                    </Border>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="border" Property="Background" Value="#FFD193FA" />
+                            <Setter Property="Foreground" Value="White" />                           
+                        </Trigger>
+
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="#FFC0B8B8" />
+                            <Setter Property="Foreground" Value="WhiteSmoke" />                            
+                        </Trigger>
+
+                        <EventTrigger RoutedEvent="MouseEnter">
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetName="border" Duration="0:0:0.3"
+                                            Storyboard.TargetProperty="Background.Color"
+                                            To="#FFA320FA">
+                                    </ColorAnimation>                                    
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>                       
+
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        
+    </Style>
+</ResourceDictionary>
