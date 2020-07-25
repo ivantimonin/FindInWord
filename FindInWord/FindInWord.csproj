@@ -105,6 +105,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Model\DirectoryUsing.cs" />
+    <Compile Include="Model\FileUsing.cs" />
     <Compile Include="Model\PathFile.cs" />
     <Compile Include="ViewModel\MainVM.cs" />
     <Compile Include="ViewModel\DelegateCommand.cs" />

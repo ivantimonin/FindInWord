@@ -75,6 +75,7 @@
         <Button Grid.Row="1" Grid.Column="0" Command="{Binding OpenDirectoryCommand, UpdateSourceTrigger=PropertyChanged}">Указать директорию</Button>
         <Button Grid.Row="1" Grid.Column="2" Command="{Binding OpenFileCommand, UpdateSourceTrigger=PropertyChanged}">Открыть файл</Button>
         <Button Grid.Row="1" Grid.Column="1" Command="{Binding SearchCommand, UpdateSourceTrigger=PropertyChanged}">Поиск</Button>
+        <Button Grid.Row="1" Grid.Column="1" Command="{Binding BreakSearchCommand, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding BreakButtonVisibality, UpdateSourceTrigger=PropertyChanged}">Прервать поиск</Button>
         <Border Grid.Column="0" Grid.RowSpan="2" BorderBrush="LightBlue" BorderThickness="1 1 1 1" />
         <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="LightBlue" BorderThickness="0 1 0 1" />
         <Border Grid.Column="2" Grid.RowSpan="2" BorderBrush="LightBlue" BorderThickness="1 1 1 1" />

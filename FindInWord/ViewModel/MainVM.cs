@@ -11,6 +11,8 @@ using Document = Microsoft.Office.Interop.Word.Document;
 using System.IO;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace FindInWord.ViewModel
 {
@@ -18,19 +20,29 @@ namespace FindInWord.ViewModel
     {
         public ObservableCollection<PathFile> PathFiles { get; private set; }
         public ObservableCollection<PathFile> PathSearchFiles { get; private set; }
-        
+
         public MainVM()
         {
             PathFiles = new ObservableCollection<PathFile>();
             PathSearchFiles= new ObservableCollection<PathFile>();
             OpenDirectoryCommand = new DelegateCommand(OpenDirectory, CanOpenDirectory);
             SearchCommand = new DelegateCommand(SearchWord, CanSearchWord);
-            OpenFileCommand = new DelegateCommand(OpenFile, CanOpenFile);          
+            OpenFileCommand = new DelegateCommand(OpenFile, CanOpenFile);
+            BreakSearchCommand = new DelegateCommand(BreakSearch);
         }
 
         public ICommand OpenDirectoryCommand { get; private set; }
         public ICommand SearchCommand { get; private set; }
         public ICommand OpenFileCommand { get; private set; }
+        public ICommand BreakSearchCommand { get; private set; }
+
+        private void BreakSearch(object obj)
+        {
+            cancelTokenSource.Cancel();
+            BreakButtonVisibality = "Collapsed";         
+            searchProcess = false;            
+            cancelTokenSource = new CancellationTokenSource();
+        }
 
         private PathFile selectedFindFiles;
         public PathFile SelectedFindFiles
@@ -43,7 +55,7 @@ namespace FindInWord.ViewModel
             {               
                 selectedFindFiles = value;                
                 OnpropertyChanged("SelectedFindFiles");                
-                TextInFile = Convert.ToString(OpenWordprocessingDocumentReadonly(SelectedFindFiles.FileName));        
+                TextInFile = Convert.ToString(FileUsing.OpenWordprocessingDocumentReadonly(SelectedFindFiles.FileName));        
             }
         }
 
@@ -78,18 +90,7 @@ namespace FindInWord.ViewModel
 
         private void OpenFile(object obj)
         {
-            Application app = new Application();
-            Document doc = app.Documents.Open(SelectedFindFiles.FileName);
-            try
-            {    
-                app.Documents.Open(SelectedFindFiles.FileName);                
-            }
-            catch (Exception ex)
-            {
-                doc.Close();
-                app.Quit();
-                MessageBox.Show(ex.Message);
-            }               
+            FileUsing.Openfile(SelectedFindFiles.FileName);                 
         }       
 
         private void OpenDirectory(object obj)
@@ -97,28 +98,21 @@ namespace FindInWord.ViewModel
             Load_indicator = 0;
             TextInFile = "";
             PathSearchFiles.Clear();
-            PathFiles.Clear();
-            var dialog = new CommonOpenFileDialog();
-            dialog.IsFolderPicker = true;      
-               
-            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            PathFiles.Clear();            
+            var files = DirectoryUsing.DirectoryOpen();
+            try
             {
-                var folder = dialog.FileName;
-                var files = Directory.EnumerateFiles($@"{folder}", "*.docx", SearchOption.AllDirectories);               
-                try
+                if (files != null)
                 {
                     foreach (string filename in files)
-                    {                        
-                        if (!filename.Contains("$"))
-                        {
-                            PathFiles.Add(new PathFile { FileName = filename });
-                        }
+                    {
+                        PathFiles.Add(new PathFile { FileName = filename });
                     }
-                }
-                catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                }                
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -162,18 +156,40 @@ namespace FindInWord.ViewModel
             }
         }
 
+        private string breakButtonVisibality="Collapsed";
+        public string BreakButtonVisibality
+        {
+            get
+            {
+                return breakButtonVisibality;
+            }
+            set
+            {
+                breakButtonVisibality = value;
+                OnpropertyChanged("breakButtonVisibality");
+            }
+        }
 
+        CancellationTokenSource cancelTokenSource = new CancellationTokenSource();
         async void SearchWord(object obj)
         {
+            CancellationToken token = cancelTokenSource.Token;
+           
             PathSearchFiles.Clear();
             Load_indicator = 0;
-            searchProcess = true;
+            searchProcess = true;            
             await Task.Run(() =>
-            {
+            {               
+                BreakButtonVisibality = "Visible";
                 foreach (var path in PathFiles)
                 {
+                    if (token.IsCancellationRequested)
+                    {
+                        //MessageBox.Show("Операция прервана");
+                        return;
+                    }
                     Load_indicator++;
-                    string text = Convert.ToString(OpenWordprocessingDocumentReadonly(path.FileName));                    
+                    string text = Convert.ToString(FileUsing.OpenWordprocessingDocumentReadonly(path.FileName));                    
                     try
                     {                        
                         if (text.Contains(FindText))
@@ -192,9 +208,9 @@ namespace FindInWord.ViewModel
                     }
                 }                
                 searchProcess = false;
-                MessageBox.Show(Convert.ToString(PathSearchFiles.Count));
-
+                BreakButtonVisibality = "Collapsed";
             });
+           // MessageBox.Show(Convert.ToString(PathSearchFiles.Count));
         }
        
 
@@ -205,28 +221,6 @@ namespace FindInWord.ViewModel
             {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
-        }
-
-        public static string OpenWordprocessingDocumentReadonly(string filepath)
-        {
-            try
-            {
-                // Open a WordprocessingDocument based on a filepath.
-                using (WordprocessingDocument wordDocument =
-                    WordprocessingDocument.Open(filepath, false))
-                {
-                    // Assign a reference to the existing document body.  
-                    Body body = wordDocument.MainDocumentPart.Document.Body;
-                    //text of Docx file 
-                    return body.InnerText.ToString();
-                }
-
-            }
-            catch (Exception ex)
-            {
-                //MessageBox.Show($"{ex.Message} Файл{filepath}");
-                return "-1";
-            }
-        }    
+        }       
     }    
 }
